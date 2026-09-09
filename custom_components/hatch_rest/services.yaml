@@ -1,0 +1,156 @@
+refresh_programs:
+  name: Refresh programs
+  description: Re-read all on-device Hatch Rest program (schedule) slots over Bluetooth.
+  target:
+    device:
+      integration: hatch_rest
+
+sync_clock:
+  name: Sync clock
+  description: Set the Rest device clock from Home Assistant (America/New_York). Needed for schedules to fire correctly.
+  target:
+    device:
+      integration: hatch_rest
+
+enable_program:
+  name: Enable program
+  description: Enable or disable one program slot. Creates a default schedule if the slot is empty.
+  target:
+    device:
+      integration: hatch_rest
+  fields:
+    index:
+      name: Slot
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 10
+          mode: box
+    enabled:
+      name: Enabled
+      required: true
+      selector:
+        boolean:
+
+set_program:
+  name: Set program
+  description: >
+    Create or update one on-device program slot (1–10).
+    By default merges into the existing slot; set replace to overwrite from defaults.
+  target:
+    device:
+      integration: hatch_rest
+  fields:
+    index:
+      name: Slot
+      description: Program slot index (1–10)
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 10
+          mode: box
+    replace:
+      name: Replace
+      description: Ignore existing slot contents and write a full new program
+      default: false
+      selector:
+        boolean:
+    name:
+      name: Name
+      selector:
+        text:
+    enabled:
+      name: Enabled
+      selector:
+        boolean:
+    time:
+      name: Time
+      description: Local start time (HH:MM or HH:MM:SS)
+      example: "19:30:00"
+      selector:
+        time:
+    duration_seconds:
+      name: Duration
+      description: Duration in seconds
+      selector:
+        number:
+          min: 0
+          max: 65535
+          unit_of_measurement: seconds
+          mode: box
+    days:
+      name: Days
+      selector:
+        select:
+          multiple: true
+          options:
+            - sunday
+            - monday
+            - tuesday
+            - wednesday
+            - thursday
+            - friday
+            - saturday
+    power:
+      name: Power
+      description: 255 = on when program fires (typical)
+      selector:
+        number:
+          min: 0
+          max: 255
+          mode: box
+    volume:
+      name: Volume
+      selector:
+        number:
+          min: 0
+          max: 255
+          mode: box
+    track:
+      name: Sound
+      selector:
+        select:
+          options:
+            - none
+            - stream
+            - noise
+            - dryer
+            - ocean
+            - wind
+            - rain
+            - bird
+            - crickets
+            - brahms
+            - twinkle
+            - rockabye
+    color:
+      name: Color (RGBA object)
+      description: '{"r":235,"g":142,"b":72,"a":127}'
+      selector:
+        object:
+    light_on:
+      name: Light on
+      selector:
+        boolean:
+    sound_on:
+      name: Sound on
+      selector:
+        boolean:
+
+clear_program:
+  name: Clear program
+  description: Delete one on-device program slot.
+  target:
+    device:
+      integration: hatch_rest
+  fields:
+    index:
+      name: Slot
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 10
+          mode: box

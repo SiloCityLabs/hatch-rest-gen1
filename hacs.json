@@ -1,3 +1,5 @@
 {
-  "name": "Hatch Rest"
+  "name": "Hatch Rest",
+  "render_readme": true,
+  "homeassistant": "2024.1.0"
 }

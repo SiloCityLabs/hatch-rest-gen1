@@ -2,6 +2,7 @@
 
 from datetime import timedelta
 import logging
+from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
@@ -14,6 +15,7 @@ from homeassistant.helpers.update_coordinator import (
 
 from .api import PyHatchBabyRestAsync
 from .const import DOMAIN, PyHatchBabyRestSound
+from .programs import HatchRestProgram
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,38 +38,55 @@ class HatchBabyRestUpdateCoordinator(DataUpdateCoordinator):
         )
         self.unique_id = unique_id
         self.hatch_rest_device = hatch_rest_device
-        self._last_data: dict[
-            str, int | tuple[int, int, int] | bool | PyHatchBabyRestSound | None
-        ] = {}
+        self.programs: dict[int, HatchRestProgram] = {}
+        self._programs_loaded = False
+        self._last_data: dict[str, Any] = {}
 
-    def get_current_data(
-        self,
-    ) -> dict[str, int | tuple[int, int, int] | bool | PyHatchBabyRestSound | None]:
+    def get_current_data(self) -> dict[str, Any]:
         """Get the current state of the Hatch Rest device."""
-        data: dict[
-            str, int | tuple[int, int, int] | bool | PyHatchBabyRestSound | None
-        ] = {
+        active = [p for p in self.programs.values() if p.exists]
+        data: dict[str, Any] = {
             "brightness": self.hatch_rest_device.brightness,
             "color": self.hatch_rest_device.color,
             "power": self.hatch_rest_device.power,
             "sound": self.hatch_rest_device.sound,
             "volume": self.hatch_rest_device.volume,
+            "programs": {idx: p.as_dict() for idx, p in self.programs.items()},
+            "program_count": len(active),
+            "enabled_program_count": sum(1 for p in active if p.enabled),
         }
         _LOGGER.debug("Data updated: %s", data)
         return data
 
-    async def _async_update_data(
-        self,
-    ) -> dict[str, int | tuple[int, int, int] | bool | PyHatchBabyRestSound | None]:
+    async def async_refresh_programs(self) -> dict[int, HatchRestProgram]:
+        """Pull all on-device program slots over BLE."""
+        programs = await self.hatch_rest_device.get_programs()
+        self.programs = programs
+        self._programs_loaded = True
+        self.async_set_updated_data(self.get_current_data())
+        return programs
+
+    async def _async_update_data(self) -> dict[str, Any]:
         _LOGGER.debug("Starting coordinator async update")
         self._last_data = self.data if self.data else {}
         try:
             await self.hatch_rest_device.refresh_data()
+            if not self._programs_loaded:
+                try:
+                    self.programs = await self.hatch_rest_device.get_programs()
+                    self._programs_loaded = True
+                except Exception as prog_err:  # noqa: BLE001
+                    _LOGGER.warning(
+                        "Initial program load failed (will retry on demand): %r",
+                        prog_err,
+                    )
+            else:
+                # Keep cache; device state refresh does not re-pull all slots.
+                self.programs = self.hatch_rest_device.programs or self.programs
         except Exception as e:
             _LOGGER.warning(
                 "_async_update_data failed to refresh Hatch Rest data: %r", e
             )
-            # Don’t raise; use previous successful data if available
             if self._last_data:
                 _LOGGER.debug("Using cached data due to _async_update_data failure")
                 return self._last_data

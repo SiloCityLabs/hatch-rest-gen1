@@ -7,8 +7,18 @@ MANUFACTURER_ID = 1076
 
 COLOR_GRADIENT = (254, 254, 254)  # setting this color turns on Gradient mode
 CHAR_TX = "02240002-5efd-47eb-9c1a-de53f7a2b232"
+CHAR_RX = "02240003-5efd-47eb-9c1a-de53f7a2b232"
 CHAR_FEEDBACK = "02260002-5efd-47eb-9c1a-de53f7a2b232"
 BT_MANUFACTURER_ID = 1076
+
+PROGRAM_SLOT_COUNT = 10
+PROGRAM_COMMAND_TIMEOUT = 8.0
+
+SERVICE_REFRESH_PROGRAMS = "refresh_programs"
+SERVICE_SET_PROGRAM = "set_program"
+SERVICE_CLEAR_PROGRAM = "clear_program"
+SERVICE_ENABLE_PROGRAM = "enable_program"
+SERVICE_SYNC_CLOCK = "sync_clock"
 
 
 class PyHatchBabyRestSound(IntEnum):

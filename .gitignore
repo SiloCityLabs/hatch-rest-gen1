@@ -1,5 +1,8 @@
 # See https://github.com/github/gitignore
 
+notes.md
+android/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
