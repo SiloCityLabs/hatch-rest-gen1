@@ -98,8 +98,6 @@ Sound `track` accepts a name (`noise`, `ocean`, `rain`, …) or the numeric id u
 ```bash
 git clone git@github.com:SiloCityLabs/hatch-rest-gen1.git
 cd hatch-rest-gen1
-# optional: upstream for reference
-git remote add upstream https://github.com/jcgoette/hatch_rest_homeassistant.git
 ```
 
 Protocol notes from APK reverse engineering live in [`notes.md`](notes.md).
