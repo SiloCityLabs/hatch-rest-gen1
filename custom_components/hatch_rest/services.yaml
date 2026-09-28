@@ -1,24 +1,38 @@
 refresh_programs:
   name: Refresh programs
   description: Re-read all on-device Hatch Rest program (schedule) slots over Bluetooth.
-  target:
-    device:
-      integration: hatch_rest
+  fields:
+    device_id:
+      name: Device
+      description: Hatch Rest device
+      required: true
+      selector:
+        device:
+          integration: hatch_rest
 
 sync_clock:
   name: Sync clock
   description: Set the Rest device clock from Home Assistant (America/New_York). Needed for schedules to fire correctly.
-  target:
-    device:
-      integration: hatch_rest
+  fields:
+    device_id:
+      name: Device
+      description: Hatch Rest device
+      required: true
+      selector:
+        device:
+          integration: hatch_rest
 
 enable_program:
   name: Enable program
   description: Enable or disable one program slot. Creates a default schedule if the slot is empty.
-  target:
-    device:
-      integration: hatch_rest
   fields:
+    device_id:
+      name: Device
+      description: Hatch Rest device
+      required: true
+      selector:
+        device:
+          integration: hatch_rest
     index:
       name: Slot
       required: true
@@ -38,10 +52,14 @@ set_program:
   description: >
     Create or update one on-device program slot (1–10).
     By default merges into the existing slot; set replace to overwrite from defaults.
-  target:
-    device:
-      integration: hatch_rest
   fields:
+    device_id:
+      name: Device
+      description: Hatch Rest device
+      required: true
+      selector:
+        device:
+          integration: hatch_rest
     index:
       name: Slot
       description: Program slot index (1–10)
@@ -142,10 +160,14 @@ set_program:
 clear_program:
   name: Clear program
   description: Delete one on-device program slot.
-  target:
-    device:
-      integration: hatch_rest
   fields:
+    device_id:
+      name: Device
+      description: Hatch Rest device
+      required: true
+      selector:
+        device:
+          integration: hatch_rest
     index:
       name: Slot
       required: true
