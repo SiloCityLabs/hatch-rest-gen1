@@ -17,6 +17,9 @@ from .coordinator import HatchBabyRestEntity
 
 _LOGGER = logging.getLogger(__name__)
 
+# Used when turning the light on after brightness was set to 0 (toggle off).
+_DEFAULT_ON_BRIGHTNESS = 128
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -32,11 +35,19 @@ async def async_setup_entry(
 class HatchBabyRestLight(HatchBabyRestEntity, LightEntity):  # pyright: ignore[reportIncompatibleVariableOverride]
     """Hatch Rest light entity."""
 
+    def __init__(self, coordinator) -> None:
+        """Initialize light and remember last non-zero brightness."""
+        super().__init__(coordinator)
+        self._last_brightness = _DEFAULT_ON_BRIGHTNESS
+
     @property
     def brightness(self) -> int | None:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Return the brightness of the light."""
-        _LOGGER.debug("light brightness = %s", self.coordinator.data.get("brightness"))
-        return self.coordinator.data.get("brightness")
+        brightness = self.coordinator.data.get("brightness")
+        _LOGGER.debug("light brightness = %s", brightness)
+        if isinstance(brightness, int) and brightness > 0:
+            self._last_brightness = brightness
+        return brightness
 
     @property
     def color_mode(self) -> ColorMode:  # pyright: ignore[reportIncompatibleVariableOverride]
@@ -46,15 +57,11 @@ class HatchBabyRestLight(HatchBabyRestEntity, LightEntity):  # pyright: ignore[r
     @property
     def is_on(self) -> bool:  # pyright: ignore[reportIncompatibleVariableOverride]
         """Return if the light is on."""
-        # if power is off, then it's off
+        # Master power off ⇒ light off
         if self.coordinator.data.get("power") is False:
             return False
-        brightness = self.coordinator.data.get("brightness")
-        if brightness:
-            _LOGGER.debug("light is_on = %s", brightness > 0)
-            # if brightness is greater than 0, then it's on
-            return brightness > 0
-        return False
+        brightness = self.coordinator.data.get("brightness") or 0
+        return brightness > 0
 
     @property
     def name(self) -> str | None:  # pyright: ignore[reportIncompatibleVariableOverride]
@@ -80,26 +87,31 @@ class HatchBabyRestLight(HatchBabyRestEntity, LightEntity):  # pyright: ignore[r
         rgb = kwargs.get(ATTR_RGB_COLOR)
 
         if not self._hatch_rest_device.power:
-            _LOGGER.debug("light _hatch_rest_device power not on -- turning on")
+            _LOGGER.debug("light power off -- turning on")
             await self._hatch_rest_device.turn_power_on()
 
-        if brightness:
+        # UI toggle sends no brightness. After turn_off we store 0 on-device, so
+        # restore the last non-zero level (or a default) or is_on stays False.
+        current = self._hatch_rest_device.brightness or 0
+        if brightness is None and current <= 0:
+            brightness = self._last_brightness or _DEFAULT_ON_BRIGHTNESS
+            _LOGGER.debug("light toggle-on restoring brightness = %s", brightness)
+
+        if brightness is not None:
             _LOGGER.debug("light setting brightness = %s", brightness)
             await self._hatch_rest_device.set_brightness(brightness)
-        if rgb:
-            _LOGGER.debug("light setting RBG = (%s[0], %s[1], %s[2])", *rgb)
+            if brightness > 0:
+                self._last_brightness = brightness
+        if rgb is not None:
+            _LOGGER.debug("light setting RGB = %s", rgb)
             await self._hatch_rest_device.set_color(*rgb)
 
-        # https://developers.home-assistant.io/docs/integration_fetching_data/
-        # If this method is used on a coordinator that polls, it will reset the time until the next time it will poll for data.
-        # each _send_command calls _refresh_data and updates API data states, so use that
         self.coordinator.async_set_updated_data(self.coordinator.get_current_data())
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        """Set the light off."""
+        """Set the light off (brightness 0; power switch stays independent)."""
+        current = self._hatch_rest_device.brightness or 0
+        if current > 0:
+            self._last_brightness = current
         await self._hatch_rest_device.set_brightness(0)
-
-        # https://developers.home-assistant.io/docs/integration_fetching_data/
-        # If this method is used on a coordinator that polls, it will reset the time until the next time it will poll for data.
-        # each _send_command calls _refresh_data and updates API data states, so use that
         self.coordinator.async_set_updated_data(self.coordinator.get_current_data())

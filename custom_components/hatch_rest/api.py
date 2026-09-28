@@ -633,8 +633,9 @@ class PyHatchBabyRestAsync:
 
     async def set_brightness(self, brightness: int):
         """Set the brightness of the Hatch Rest device."""
-        if self.color:
-            command = f"SC{self.color[0]:02x}{self.color[1]:02x}{self.color[2]:02x}{brightness:02x}"
+        # SC always needs RGB; fall back to white if color is unknown.
+        red, green, blue = self.color or (255, 255, 255)
+        command = f"SC{red:02x}{green:02x}{blue:02x}{brightness:02x}"
         _LOGGER.debug("API command: set_brightness to %s", command)
         return await self._send_command(command)
 
