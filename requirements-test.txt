@@ -9,6 +9,10 @@ homeassistant
 
 # BLE dependencies (for type hints and mocking)
 bleak
+bleak-retry-connector
+
+# USB integration imports serialx when bluetooth is loaded in tests.
+serialx
 
 # Other?
 aiousbwatcher

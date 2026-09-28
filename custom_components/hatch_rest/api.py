@@ -10,8 +10,8 @@ Extended with on-device Program (schedule) EG*/ES* support from Hatch Sleep APK.
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime
 import logging
+from datetime import datetime, timezone
 from time import monotonic
 
 from bleak.backends.device import BLEDevice
@@ -42,9 +42,7 @@ from .programs import (
 
 _LOGGER = logging.getLogger(__name__)
 
-_STATUS_CODES = frozenset(
-    {"OK", "E01", "E02", "E03", "E04", "E05", "E06", "Unknown"}
-)
+_STATUS_CODES = frozenset({"OK", "E01", "E02", "E03", "E04", "E05", "E06", "Unknown"})
 
 
 def _assert_value(check_val: list[str], index: int, assert_val: str):
@@ -271,7 +269,9 @@ class PyHatchBabyRestAsync:
         """
         if log_timing := _LOGGER.isEnabledFor(logging.DEBUG):
             start = monotonic()
-            _LOGGER.debug("Started _send_command at %s", datetime.now().isoformat())
+            _LOGGER.debug(
+                "Started _send_command at %s", datetime.now(tz=timezone.utc).isoformat()
+            )
 
         async with self._command_lock:
             self._set_active_operations(1)
@@ -301,7 +301,7 @@ class PyHatchBabyRestAsync:
         if log_timing:
             _LOGGER.debug(
                 "Finished _send_command at %s (total of %.3f seconds)",
-                datetime.now().isoformat(),
+                datetime.now(tz=timezone.utc).isoformat(),
                 monotonic() - start,  # pyright: ignore[reportPossiblyUnboundVariable]
             )
 
@@ -309,7 +309,9 @@ class PyHatchBabyRestAsync:
         """Refresh data from Hatch Rest device."""
         if log_timing := _LOGGER.isEnabledFor(logging.DEBUG):
             start = monotonic()
-            _LOGGER.debug("Started refresh_data at %s", datetime.now().isoformat())
+            _LOGGER.debug(
+                "Started refresh_data at %s", datetime.now(tz=timezone.utc).isoformat()
+            )
 
         self._set_active_operations(1)
         await self._client_connect()
@@ -358,7 +360,7 @@ class PyHatchBabyRestAsync:
         if log_timing:
             _LOGGER.debug(
                 "Finished refresh_data at %s (total of %.3f seconds)",
-                datetime.now().isoformat(),
+                datetime.now(tz=timezone.utc).isoformat(),
                 monotonic() - start,  # pyright: ignore[reportPossiblyUnboundVariable]
             )
 

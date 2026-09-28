@@ -123,9 +123,11 @@ class TestPyHatchBabyRestAsync:
         mock_client.read_gatt_char = AsyncMock(return_value=raw_response)
         api._client = mock_client
 
-        with patch.object(api, "_client_connect", new_callable=AsyncMock):
-            with patch.object(api, "_client_disconnect", new_callable=AsyncMock):
-                await api.refresh_data()
+        with (
+            patch.object(api, "_client_connect", new_callable=AsyncMock),
+            patch.object(api, "_client_disconnect", new_callable=AsyncMock),
+        ):
+            await api.refresh_data()
 
         assert api.color == (255, 128, 64)
         assert api.brightness == 100
@@ -186,10 +188,12 @@ class TestPyHatchBabyRestAsync:
         mock_client.write_gatt_char = AsyncMock()
         api._client = mock_client
 
-        with patch.object(api, "_client_connect", new_callable=AsyncMock):
-            with patch.object(api, "refresh_data", new_callable=AsyncMock):
-                with patch("asyncio.sleep", new_callable=AsyncMock):
-                    await api._send_command("SI01")
+        with (
+            patch.object(api, "_client_connect", new_callable=AsyncMock),
+            patch.object(api, "refresh_data", new_callable=AsyncMock),
+            patch("asyncio.sleep", new_callable=AsyncMock),
+        ):
+            await api._send_command("SI01")
 
         mock_client.write_gatt_char.assert_called_once_with(
             char_specifier=CHAR_TX,

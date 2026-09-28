@@ -1,9 +1,10 @@
 """Hatch Rest coordinator."""
 
-from datetime import timedelta
 import logging
+from datetime import timedelta
 from typing import Any
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import DeviceInfo
@@ -14,7 +15,7 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from .api import PyHatchBabyRestAsync
-from .const import DOMAIN, PyHatchBabyRestSound
+from .const import DOMAIN
 from .programs import HatchRestProgram
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,11 +29,13 @@ class HatchBabyRestUpdateCoordinator(DataUpdateCoordinator):
         hass: HomeAssistant,
         unique_id: str | None,
         hatch_rest_device: PyHatchBabyRestAsync,
+        config_entry: ConfigEntry | None = None,
     ) -> None:
         """Initialize the coordinator."""
         super().__init__(
             hass,
             _LOGGER,
+            config_entry=config_entry,
             name=DOMAIN,
             update_interval=timedelta(seconds=60),
         )

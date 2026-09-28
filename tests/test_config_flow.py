@@ -51,19 +51,21 @@ class TestHatchBabyRestConfigFlow:
         mock_api.name = "Hatch Rest"
         mock_api.refresh_data = AsyncMock()
 
-        with patch(
-            "custom_components.hatch_rest.config_flow.async_ble_device_from_address",
-            return_value=MagicMock(),
-        ):
-            with patch(
+        with (
+            patch(
+                "custom_components.hatch_rest.config_flow.async_ble_device_from_address",
+                return_value=MagicMock(),
+            ),
+            patch(
                 "custom_components.hatch_rest.config_flow.PyHatchBabyRestAsync",
                 return_value=mock_api,
-            ):
-                result = await hass.config_entries.flow.async_init(
-                    DOMAIN,
-                    context={"source": config_entries.SOURCE_BLUETOOTH},
-                    data=mock_service_info,
-                )
+            ),
+        ):
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN,
+                context={"source": config_entries.SOURCE_BLUETOOTH},
+                data=mock_service_info,
+            )
 
         assert result["type"] == FlowResultType.FORM
         assert result["step_id"] == "bluetooth_confirm"
@@ -77,24 +79,26 @@ class TestHatchBabyRestConfigFlow:
         mock_api.name = "Hatch Rest"
         mock_api.refresh_data = AsyncMock()
 
-        with patch(
-            "custom_components.hatch_rest.config_flow.async_ble_device_from_address",
-            return_value=MagicMock(),
-        ):
-            with patch(
+        with (
+            patch(
+                "custom_components.hatch_rest.config_flow.async_ble_device_from_address",
+                return_value=MagicMock(),
+            ),
+            patch(
                 "custom_components.hatch_rest.config_flow.PyHatchBabyRestAsync",
                 return_value=mock_api,
-            ):
-                result = await hass.config_entries.flow.async_init(
-                    DOMAIN,
-                    context={"source": config_entries.SOURCE_BLUETOOTH},
-                    data=mock_service_info,
-                )
+            ),
+        ):
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN,
+                context={"source": config_entries.SOURCE_BLUETOOTH},
+                data=mock_service_info,
+            )
 
-                result = await hass.config_entries.flow.async_configure(
-                    result["flow_id"],
-                    user_input={},
-                )
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                user_input={},
+            )
 
         assert result["type"] == FlowResultType.CREATE_ENTRY
         assert result["title"] == "Hatch Rest"
@@ -126,19 +130,21 @@ class TestHatchBabyRestConfigFlow:
         mock_api = MagicMock()
         mock_api.refresh_data = AsyncMock(side_effect=Exception("Connection failed"))
 
-        with patch(
-            "custom_components.hatch_rest.config_flow.async_ble_device_from_address",
-            return_value=MagicMock(),
-        ):
-            with patch(
+        with (
+            patch(
+                "custom_components.hatch_rest.config_flow.async_ble_device_from_address",
+                return_value=MagicMock(),
+            ),
+            patch(
                 "custom_components.hatch_rest.config_flow.PyHatchBabyRestAsync",
                 return_value=mock_api,
-            ):
-                result = await hass.config_entries.flow.async_init(
-                    DOMAIN,
-                    context={"source": config_entries.SOURCE_BLUETOOTH},
-                    data=mock_service_info,
-                )
+            ),
+        ):
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN,
+                context={"source": config_entries.SOURCE_BLUETOOTH},
+                data=mock_service_info,
+            )
 
         assert result["type"] == FlowResultType.ABORT
         assert result["reason"] == "unknown"
@@ -167,22 +173,24 @@ class TestHatchBabyRestConfigFlow:
         mock_api.name = "Hatch Rest"
         mock_api.refresh_data = AsyncMock()
 
-        with patch(
-            "custom_components.hatch_rest.config_flow.async_discovered_service_info",
-            return_value=[mock_service_info],
-        ):
-            with patch(
+        with (
+            patch(
+                "custom_components.hatch_rest.config_flow.async_discovered_service_info",
+                return_value=[mock_service_info],
+            ),
+            patch(
                 "custom_components.hatch_rest.config_flow.async_ble_device_from_address",
                 return_value=MagicMock(),
-            ):
-                with patch(
-                    "custom_components.hatch_rest.config_flow.PyHatchBabyRestAsync",
-                    return_value=mock_api,
-                ):
-                    result = await hass.config_entries.flow.async_init(
-                        DOMAIN,
-                        context={"source": config_entries.SOURCE_USER},
-                    )
+            ),
+            patch(
+                "custom_components.hatch_rest.config_flow.PyHatchBabyRestAsync",
+                return_value=mock_api,
+            ),
+        ):
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN,
+                context={"source": config_entries.SOURCE_USER},
+            )
 
         assert result["type"] == FlowResultType.FORM
         assert result["step_id"] == "user"

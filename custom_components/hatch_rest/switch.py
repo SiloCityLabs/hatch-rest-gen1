@@ -66,9 +66,7 @@ class HatchBabyRestProgramSwitch(HatchBabyRestEntity, SwitchEntity):
 
     _attr_entity_registry_enabled_default = True
 
-    def __init__(
-        self, coordinator: HatchBabyRestUpdateCoordinator, index: int
-    ) -> None:
+    def __init__(self, coordinator: HatchBabyRestUpdateCoordinator, index: int) -> None:
         """Initialize program enable switch."""
         super().__init__(coordinator)
         self._index = index
@@ -79,7 +77,7 @@ class HatchBabyRestProgramSwitch(HatchBabyRestEntity, SwitchEntity):
     def name(self) -> str:
         """Return entity name."""
         program = self.coordinator.programs.get(self._index)
-        label = (program.name if program and program.name else f"Program {self._index}")
+        label = program.name if program and program.name else f"Program {self._index}"
         base = self.device_name.title() if self.device_name else "Hatch Rest"
         return f"{base} {label} Enabled"
 

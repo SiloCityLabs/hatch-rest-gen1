@@ -160,10 +160,16 @@ class HatchRestProgram:
 
     def time_command(self) -> str:
         """EST payload using today's local date + program clock time."""
-        now = datetime.now()
+        now = datetime.now(tz=timezone.utc).astimezone()
         tod = self.time_of_day or time(0, 0, 0)
         stamp = datetime(
-            now.year, now.month, now.day, tod.hour, tod.minute, tod.second
+            now.year,
+            now.month,
+            now.day,
+            tod.hour,
+            tod.minute,
+            tod.second,
+            tzinfo=now.tzinfo,
         )
         return stamp.strftime("%Y%m%d%H%M%S")
 
@@ -273,7 +279,9 @@ class HatchRestProgram:
     @classmethod
     def from_service_data(cls, data: dict[str, Any]) -> HatchRestProgram:
         """Build a full program from HA service call fields (new / replace)."""
-        base = cls.default_slot(int(data["index"]), enabled=bool(data.get("enabled", True)))
+        base = cls.default_slot(
+            int(data["index"]), enabled=bool(data.get("enabled", True))
+        )
         return base.merge_service_data(data)
 
 
@@ -303,13 +311,15 @@ def parse_program_time(value: str) -> time | None:
                 return None
         return None
     try:
-        stamp = datetime.strptime(raw[:14], "%Y%m%d%H%M%S")
+        stamp = datetime.strptime(f"{raw[:14]}+0000", "%Y%m%d%H%M%S%z")
     except ValueError:
         return None
     return stamp.time()
 
 
-def format_device_clock(now: datetime | None = None, tz_name: str = "America/New_York") -> str:
+def format_device_clock(
+    now: datetime | None = None, tz_name: str = "America/New_York"
+) -> str:
     """Build ST payload: yyyyMMddHHmmss + Hatch TZ letter."""
     tz = ZoneInfo(tz_name)
     stamp = (now or datetime.now(tz=timezone.utc)).astimezone(tz)

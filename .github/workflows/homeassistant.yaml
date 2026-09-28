@@ -13,22 +13,22 @@ on:
 jobs:
   hassfest:
     name: hassfest
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Hassfest
         uses: home-assistant/actions/hassfest@master
 
   # hacs:
   #   name: hacs
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-24.04
 
   #   steps:
   #     - name: Checkout the repository
-  #       uses: actions/checkout@v4
+  #       uses: actions/checkout@v5
 
   #     - name: HACS Action
   #       uses: hacs/action@main

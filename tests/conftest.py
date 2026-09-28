@@ -69,9 +69,11 @@ def mock_hatch_api(mock_ble_device: BLEDevice) -> Generator[AsyncMock, None, Non
         mock_api.sound = PyHatchBabyRestSound.ocean
         mock_api.volume = 100
         mock_api.power = True
+        mock_api.programs = {}
 
         # Async methods
         mock_api.refresh_data = AsyncMock()
+        mock_api.get_programs = AsyncMock(return_value={})
         mock_api.turn_power_on = AsyncMock()
         mock_api.turn_power_off = AsyncMock()
         mock_api.set_sound = AsyncMock()

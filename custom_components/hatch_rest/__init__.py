@@ -35,6 +35,7 @@ async def async_setup_entry(
         hass,
         entry.unique_id,
         hatch_rest_device,
+        config_entry=entry,
     )
     entry.runtime_data = coordinator
 

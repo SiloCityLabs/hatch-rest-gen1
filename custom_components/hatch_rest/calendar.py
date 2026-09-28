@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta
 import logging
+from datetime import date, datetime, timedelta
 
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.config_entries import ConfigEntry
@@ -67,9 +67,7 @@ class HatchBabyRestProgramsCalendar(HatchBabyRestEntity, CalendarEntity):
         """Return program occurrences in the requested window."""
         return self._events_between(start_date, end_date)
 
-    def _events_between(
-        self, start: datetime, end: datetime
-    ) -> list[CalendarEvent]:
+    def _events_between(self, start: datetime, end: datetime) -> list[CalendarEvent]:
         programs = list(self.coordinator.programs.values())
         events: list[CalendarEvent] = []
         day = start.date()
@@ -92,13 +90,14 @@ class HatchBabyRestProgramsCalendar(HatchBabyRestEntity, CalendarEntity):
         if not program.exists or not program.enabled or not program.time_of_day:
             return None
         weekday_name = _WEEKDAY_TO_NAME[day.weekday()]
-        if not (program.days.mask & DAY_BITS[weekday_name]):
-            # Empty mask → treat as every day (matches "no days set" edge case poorly;
-            # app always writes a mask when saving).
-            if program.days.mask != 0:
-                return None
+        # Empty mask → treat as every day (matches "no days set" edge case poorly;
+        # app always writes a mask when saving).
+        if program.days.mask != 0 and not (program.days.mask & DAY_BITS[weekday_name]):
+            return None
 
-        start_dt = datetime.combine(day, program.time_of_day, tzinfo=dt_util.DEFAULT_TIME_ZONE)
+        start_dt = datetime.combine(
+            day, program.time_of_day, tzinfo=dt_util.DEFAULT_TIME_ZONE
+        )
         duration = program.duration_seconds or 0
         end_dt = start_dt + timedelta(seconds=duration if duration > 0 else 60)
         summary = program.name or f"Program {program.index}"

@@ -5,7 +5,6 @@ import logging
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.components.bluetooth import (
     BluetoothServiceInfoBleak,
@@ -66,7 +65,7 @@ class HatchBabyRestConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self.hass, discovery_info.address, connectable=True
             )
             if not ble_device:
-                raise ValueError("BLEDevice does not exist")  # noqa: TRY301
+                raise ValueError("BLEDevice does not exist")
             hatch_rest_device = PyHatchBabyRestAsync(ble_device)
             await hatch_rest_device.refresh_data()
         except Exception as e:  # noqa: BLE001
@@ -134,7 +133,7 @@ class HatchBabyRestConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self.hass, discovery_info.address
                 )
                 if not ble_device:
-                    raise ValueError("BLEDevice does not exist")  # noqa: TRY301
+                    raise ValueError("BLEDevice does not exist")
                 hatch_rest_device = PyHatchBabyRestAsync(ble_device)
                 await hatch_rest_device.refresh_data()
             except Exception as e:  # noqa: BLE001
